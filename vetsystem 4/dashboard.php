@@ -1,0 +1,11 @@
+<?php
+require_once 'config/db.php'; require_once 'config/auth.php'; require_login();
+$page_title='Dashboard';
+$owners=(int)$pdo->query('SELECT COUNT(*) FROM owners')->fetchColumn(); $farms=(int)$pdo->query('SELECT COUNT(*) FROM farms')->fetchColumn(); $animals=(int)$pdo->query('SELECT COALESCE(SUM(animal_count),0) FROM farms')->fetchColumn(); $monitored=(int)$pdo->query('SELECT COUNT(*) FROM monitoring')->fetchColumn();
+$rows=$pdo->query('SELECT o.*,COUNT(DISTINCT f.id) farm_count,COALESCE(SUM(f.animal_count),0) animal_total FROM owners o LEFT JOIN farms f ON f.owner_id=o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 12')->fetchAll();
+include 'partials/header.php';
+?>
+<section class="stats"><div class="stat"><small>Registered owners</small><strong><?=number_format($owners)?></strong></div><div class="stat"><small>Registered farms</small><strong><?=number_format($farms)?></strong></div><div class="stat"><small>Total animals</small><strong><?=number_format($animals)?></strong></div><div class="stat"><small>Monitoring records</small><strong><?=number_format($monitored)?></strong></div></section>
+<section class="panel"><div class="panel-head"><h3>Registered Poultry & Livestock Owners</h3><a class="btn primary btn-sm" href="livestock.php">+ Add owner / farm</a></div><div class="table-wrap"><table><thead><tr><th>Owner</th><th>Phone</th><th>Barangay</th><th>Farms</th><th>Animals</th><th>Registered</th></tr></thead><tbody><?php foreach($rows as $r):?><tr><td><b><?=h($r['owner_name'])?></b></td><td><?=h($r['phone'])?></td><td><?=h($r['barangay'])?></td><td><?=$r['farm_count']?></td><td><?=$r['animal_total']?></td><td><?=date('M d, Y',strtotime($r['created_at']))?></td></tr><?php endforeach;?><?php if(!$rows):?><tr><td colspan="6" class="empty">No owners registered yet. Select “Add owner / farm” to begin.</td></tr><?php endif;?></tbody></table></div></section>
+<section class="panel"><div class="panel-head"><h3>Quick links</h3></div><div class="actions"><a class="btn yellow" href="livestock.php">Manage livestock</a><a class="btn primary" href="monitoring.php">Add monitoring record</a><a class="btn primary" href="gis_map.php">Open GIS map</a></div></section>
+<?php include 'partials/footer.php'; ?>

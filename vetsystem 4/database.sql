@@ -1,0 +1,48 @@
+CREATE DATABASE IF NOT EXISTS vetsystem CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE vetsystem;
+
+CREATE TABLE IF NOT EXISTS users (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ full_name VARCHAR(120) NOT NULL,
+ email VARCHAR(160) NOT NULL UNIQUE,
+ password_hash VARCHAR(255) NOT NULL,
+ role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS owners (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ owner_name VARCHAR(150) NOT NULL,
+ phone VARCHAR(40) DEFAULT NULL,
+ address TEXT DEFAULT NULL,
+ barangay VARCHAR(100) NOT NULL,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS farms (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ owner_id INT NOT NULL,
+ farm_name VARCHAR(150) NOT NULL,
+ animal_type ENUM('Poultry','Swine','Cattle','Goat','Carabao','Other') NOT NULL,
+ animal_detail VARCHAR(100) DEFAULT NULL,
+ animal_count INT NOT NULL DEFAULT 0,
+ barangay VARCHAR(100) NOT NULL,
+ latitude DECIMAL(10,7) DEFAULT NULL,
+ longitude DECIMAL(10,7) DEFAULT NULL,
+ notes TEXT DEFAULT NULL,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT fk_farm_owner FOREIGN KEY (owner_id) REFERENCES owners(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS monitoring (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ farm_id INT NOT NULL,
+ deaths INT NOT NULL DEFAULT 0,
+ observation_date DATE NOT NULL,
+ symptoms TEXT DEFAULT NULL,
+ remarks TEXT DEFAULT NULL,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT fk_monitor_farm FOREIGN KEY (farm_id) REFERENCES farms(id) ON DELETE CASCADE
+);
+
+-- Demo account is created automatically by register.php on first registration.
